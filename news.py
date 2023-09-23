@@ -40,11 +40,11 @@ def extract_content(subURL):
 
 
 # 將 PTT Stock 存到 URL 變數中
-URL = 'https://www.ptt.cc/bbs/Stock/index1.html' 
+URL = 'https://www.ptt.cc/bbs/Stock/index43.html' 
 
 
 # 使用 for 迴圈將逐筆將標籤(tags)裡的 List 印出, 這裡取3頁
-for round in range(3):
+for round in range(5775):
     
     # Send get request to PTT Stock
     RES = rq.get(URL)
@@ -71,5 +71,8 @@ for round in range(3):
             continue
         subURL = 'https://www.ptt.cc' + x['href']
         print(article)
-        extract_content(subURL)
+        try:
+            extract_content(subURL)
+        except Exception as e:
+            print(f'發生異常，異常原因：{e}')
         time.sleep(random.uniform(0.5, 2.5))
