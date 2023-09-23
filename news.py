@@ -1,8 +1,11 @@
 # HTTP Method: GET(), POST()
+import random
 import requests as rq
+import time
 
 # 導入 BeautifulSoup module: 解析 HTML 語法工具
 from bs4 import BeautifulSoup as BS
+from fake_useragent import UserAgent
 
 def find_last_index(content):
     last_index = 0
@@ -12,8 +15,11 @@ def find_last_index(content):
     return last_index
 
 def extract_content(subURL):
+    ua = UserAgent()
+    user_agent = ua.random
+    headers = {'user-agent': user_agent}
     print(subURL)
-    res = rq.get(subURL)
+    res = rq.get(subURL, headers=headers)
     soup = BS(res.text, 'html.parser')
     header = soup.select('span.article-meta-value')
     author = header[0].text
@@ -31,6 +37,7 @@ def extract_content(subURL):
     comment_content = soup.select('div.push span.push-content')
     for i in range(len(comment_tag)):
         print(f'{comment_tag[i].text.strip()} {comment_user[i].text.strip()}{comment_content[i].text.strip()}')
+
 
 # 將 PTT Stock 存到 URL 變數中
 URL = 'https://www.ptt.cc/bbs/Stock/index1.html' 
@@ -65,3 +72,4 @@ for round in range(3):
         subURL = 'https://www.ptt.cc' + x['href']
         print(article)
         extract_content(subURL)
+        time.sleep(random.uniform(0.5, 2.5))
