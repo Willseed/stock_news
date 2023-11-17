@@ -9,6 +9,23 @@ import os
 from bs4 import BeautifulSoup as BS
 from fake_useragent import UserAgent
 
+def index_mapping(year: int) -> list:
+    index_list = {
+        2011: [40, 5],
+        2012: [44, 9],
+        2013: [52, 14],
+        2014: [65, 16],
+        2015: [80, 39],
+        2016: [118, 29],
+        2017: [146, 27],
+        2018: [172, 44],
+        2019: [215, 741],
+        2020: [955, 1459],
+        2021: [2413, 2113],
+        2022: [4525, 1292]
+    }
+    return index_list[year]
+
 # 時間戳轉換成日期
 def timestamp2date(timestamp: str):
     tmp_list = timestamp.split()
@@ -27,7 +44,7 @@ def find_last_index(content):
             last_index = index
     return last_index
 
-def extract_content(subURL: str, article: str):
+def extract_content(subURL: str, article: str, target_year: int):
     ua = UserAgent()
     user_agent = ua.random
     headers = {'user-agent': user_agent}
@@ -39,10 +56,12 @@ def extract_content(subURL: str, article: str):
     author = header[0].text
     timestamp = header[3].text
     date = timestamp2date(timestamp)
+    if int(date[0:4]) != target_year:
+        return
     serial_number = subURL.split('/')[-1]
-    if os.path.isdir('file') == False:
-        os.mkdir('file')
-    with open(f'./file/{date}_{serial_number}.txt', 'w', encoding='utf-8') as f:
+    if os.path.isdir(f'file/{target_year}') == False:
+        os.makedirs(f'file/{target_year}')
+    with open(f'./file/{target_year}/{date}_{serial_number}.txt', 'w', encoding='utf-8') as f:
         f.write(subURL + '\n')
         f.write(article + '\n')
         f.write(author + '\n')
@@ -59,11 +78,14 @@ def extract_content(subURL: str, article: str):
         for i in range(len(comment_tag)):
             f.write(f'{comment_tag[i].text.strip()} {comment_user[i].text.strip()}{comment_content[i].text.strip()}\n')
 
+year = 2016
+year_index, page_index = index_mapping(year)
+
 # 將 PTT Stock 存到 URL 變數中
-URL = 'https://www.ptt.cc/bbs/Stock/index43.html' 
+URL = f'https://www.ptt.cc/bbs/Stock/index{year_index}.html' 
 
 # 使用 for 迴圈將逐筆將標籤(tags)裡的 List 印出, 這裡取3頁
-for round in range(5775):
+for round in range(page_index):
     
     # Send get request to PTT Stock
     RES = rq.get(URL)
@@ -90,8 +112,7 @@ for round in range(5775):
             continue
         subURL = 'https://www.ptt.cc' + x['href']
         try:
-            extract_content(subURL, article)
+            extract_content(subURL, article, year)
         except Exception as e:
             print(f'發生異常，異常原因：{e}')
         time.sleep(random.uniform(0.5, 2.5))
-    break
