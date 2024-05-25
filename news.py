@@ -22,7 +22,9 @@ def index_mapping(year: int) -> list:
         2019: [215, 741],
         2020: [955, 1459],
         2021: [2413, 2113],
-        2022: [4525, 1292]
+        2022: [4525, 1292],
+        2023: [5817, 991],
+        2024: [6808, 7308]
     }
     return index_list[year]
 
@@ -56,6 +58,7 @@ def extract_content(subURL: str, article: str, target_year: int):
     author = header[0].text
     timestamp = header[3].text
     date = timestamp2date(timestamp)
+    print(date)
     if int(date[0:4]) != target_year:
         return
     serial_number = subURL.split('/')[-1]
@@ -78,11 +81,11 @@ def extract_content(subURL: str, article: str, target_year: int):
         for i in range(len(comment_tag)):
             f.write(f'{comment_tag[i].text.strip()} {comment_user[i].text.strip()}{comment_content[i].text.strip()}\n')
 
-year = 2016
+year = 2023
 year_index, page_index = index_mapping(year)
 
 # 將 PTT Stock 存到 URL 變數中
-URL = f'https://www.ptt.cc/bbs/Stock/index{year_index}.html' 
+URL = f'https://www.ptt.cc/bbs/Stock/index{year_index}.html'
 
 # 使用 for 迴圈將逐筆將標籤(tags)裡的 List 印出, 這裡取3頁
 for round in range(page_index):
@@ -97,7 +100,7 @@ for round in range(page_index):
     articles = soup.select('div.title a') 
     
     # 呈上。取出'下一頁'元素
-    paging = soup.select('div.btn-group-paging a') 
+    paging = soup.select('div.btn-group-paging a')
     
     # 將'下一頁'元素存到 next_URL 中
     next_URL = 'https://www.ptt.cc' + paging[2]['href'] 
@@ -106,11 +109,11 @@ for round in range(page_index):
     URL = next_URL 
     
     # 萃取文字出來: title, URL
-    for x in articles: 
-        article = x.text
+    for item in articles:
+        article = item.text
         if '[公告]' in article:
             continue
-        subURL = 'https://www.ptt.cc' + x['href']
+        subURL = 'https://www.ptt.cc' + item['href']
         try:
             extract_content(subURL, article, year)
         except Exception as e:
