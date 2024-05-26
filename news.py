@@ -89,6 +89,7 @@ URL = f'https://www.ptt.cc/bbs/Stock/index{year_index}.html'
 
 # 使用 for 迴圈將逐筆將標籤(tags)裡的 List 印出, 這裡取3頁
 for round in range(page_index):
+    print(f'第{year_index + round - 1}頁')
     
     # Send get request to PTT Stock
     RES = rq.get(URL)
